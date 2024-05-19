@@ -11,11 +11,16 @@ BLEConfigItem::BLEConfigItem(const char* name, unsigned int size)
   _name = name;
   itemNumber++;
 
-  _characteristic = new BLECharacteristic("19B10001-ABCD-537E-4F6C-D104768A1214", BLERead | BLEWrite, size);
+  sprintf(_uuid, BLEConfig::UUID_TEMPLATE, itemNumber);
+
+  _characteristic = new BLECharacteristic(_uuid, BLERead | BLEWrite, size);
   _characteristic->setEventHandler(BLEWritten, characteristicWritten);
 
   _byName[name] = this;
   _byCharacteristic[*_characteristic] = this;
+
+  BLEDescriptor desc("19B10000-E8D2-537E-4F6C-D104768A1214", name);
+  _characteristic->addDescriptor(desc);
 }
 
 void BLEConfigItem::characteristicWritten(BLEDevice central, BLECharacteristic characteristic) {

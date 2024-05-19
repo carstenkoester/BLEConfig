@@ -14,6 +14,7 @@ class BLEConfigItem
 
     static unsigned int itemNumber;
 
+
   protected:
     BLECharacteristic* _characteristic;
     const char* _name;
@@ -23,6 +24,8 @@ class BLEConfigItem
 
     virtual void writeHandler(const char* value, unsigned int size) = 0;
     virtual void loadPreferences() = 0;
+
+    char _uuid[37];
 
   friend class BLEConfig;
 };
