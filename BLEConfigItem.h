@@ -2,22 +2,31 @@
 #define BLEConfigItem_h
 
 #include <ArduinoBLE.h>
+#include <map>
 
 class BLEConfigItem
 {
   public:
-    BLEConfigItem(const char* name, unsigned int defaultValue, unsigned int* variable);
+    BLEConfigItem(const char* name, void* variable, unsigned int size);
     inline BLECharacteristic* getCharacteristic() { return _characteristic; };
+    inline const char* getName() { return _name; };
 
-    static unsigned int item_count;
+    static void characteristicWritten(BLEDevice central, BLECharacteristic characteristic);
 
-    const char* _name;
+    static unsigned int itemNumber;
 
-  private:
+  protected:
     BLECharacteristic* _characteristic;
-
-
+    const char* _name;
     void* _variable;
+
+    static std::map<String, BLEConfigItem*> _byName;
+    static std::map<BLECharacteristic, BLEConfigItem*> _byCharacteristic;
 };
 
+class BLEUIntConfigItem : public BLEConfigItem
+{
+  public:
+    BLEUIntConfigItem(const char* name, unsigned int* variable, unsigned int defaultValue);
+};
 #endif

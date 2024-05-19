@@ -11,7 +11,7 @@ BLEConfig::BLEConfig(const char* appName)
 
 void BLEConfig::addItem(const char* name, unsigned int defaultValue, unsigned int *variable)
 {
-  BLEConfigItem* item = new BLEConfigItem(name, defaultValue, variable);
+  BLEConfigItem* item = new BLEUIntConfigItem(name, variable, defaultValue);
 
   _service.addCharacteristic(*item->getCharacteristic());
   _items[name] = item;
@@ -35,7 +35,8 @@ void BLEConfig::advertise()
   Serial.println(("Bluetooth® device active, waiting for connections..."));
 }
 
-unsigned int BLEConfig::test1() {
+unsigned int BLEConfig::test1()
+{
   unsigned int v;
   _items["dmx_address"]->getCharacteristic()->readValue(v);
 
