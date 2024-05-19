@@ -1,0 +1,19 @@
+Things to be done for this to be useful:
+
+- Implement timer to disable it after X minutes. Currently it remains configurable for the lifetime of the device.
+- Some *very basic* input validation at least
+- Re-test the ability to write values > 8 bits.. have I lost that ability with the changed uint methods?
+
+
+Also,
+
+- Test with more than one config item
+- Implement a Read-Only characteristic with some sort of unique identifier (based on MAC address or whatnot - something to differentiate multiple similar devices). Maybe use Manufacturer Data for that.
+- More generally, implement some Manufacturer Data.
+- Apply values right away but don't make them persistent until BLE disconnect? (This would create some safeguard against storing bad values)?
+
+
+Later,
+
+- Implement other data types eg strings
+- Implement input validation and figure out how to respond to invalid input

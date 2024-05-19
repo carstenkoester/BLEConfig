@@ -43,13 +43,13 @@ BLEUIntConfigItem::BLEUIntConfigItem(const char* name, unsigned int defaultValue
 void BLEUIntConfigItem::writeHandler(const char* value, unsigned int size)
 {
   _value = (unsigned int) *value;
+  BLEConfig::preferences.putUInt(_name, _value);
 }
 
 void BLEUIntConfigItem::loadPreferences()
 {
   _value = BLEConfig::preferences.getUInt(_name, _defaultValue);
   BLEConfig::preferences.putUInt(_name, _value);
-  BLEConfig::preferences.end();
 
   _characteristic->writeValue(_value);
 }

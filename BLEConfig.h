@@ -20,6 +20,8 @@ class BLEConfig
     void advertise();
     void end();
 
+    inline const bool active() const { return(_active); };
+
     static Preferences preferences;
 
     static constexpr const char* UUID_TEMPLATE = "84fdef37-%04x-41e6-adbd-f87ced6f2e5b";
@@ -27,6 +29,7 @@ class BLEConfig
   private:
     BLEService _service;
     const char* _appName;
+    bool _active;
 };
 
 #endif

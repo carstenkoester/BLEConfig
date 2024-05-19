@@ -7,6 +7,7 @@ BLEConfig::BLEConfig(const char* appName)
   : _service("19B10000-E8F2-537E-4F6C-D104768A1214")
 {
   _appName = appName;
+  _active = false;
 }
 
 void BLEConfig::addItem(BLEConfigItem& item)
@@ -24,6 +25,7 @@ bool BLEConfig::begin()
   BLE.setLocalName(_appName);
   BLE.setAdvertisedService(_service);
 
+  _active = true;
   return true;
 }
 
@@ -39,6 +41,13 @@ bool BLEConfig::begin(BLEConfigItemList items)
     _service.addCharacteristic(*(item->getCharacteristic()));
   }
   return true;
+}
+
+void BLEConfig::end()
+{
+  preferences.end();
+  BLE.end();
+  _active = false;
 }
 
 void BLEConfig::advertise()
