@@ -9,23 +9,36 @@ BLEConfig::BLEConfig(const char* appName)
   _appName = appName;
 }
 
-void BLEConfig::addItem(const char* name, unsigned int defaultValue, unsigned int *variable)
+void BLEConfig::addItem(BLEConfigItem& item)
 {
-  BLEConfigItem* item = new BLEUIntConfigItem(name, variable, defaultValue);
-
-  _service.addCharacteristic(*item->getCharacteristic());
-  _items[name] = item;
+  item.loadPreferences();
+  _service.addCharacteristic(*item.getCharacteristic());
 }
 
-void BLEConfig::begin()
+bool BLEConfig::begin()
 {
   preferences.begin("BLEConfig", false);
   if (!BLE.begin()) {
-    Serial.println("starting Bluetooth® Low Energy module failed!");
-    while (1);
+    return false;
   }
   BLE.setLocalName(_appName);
   BLE.setAdvertisedService(_service);
+
+  return true;
+}
+
+bool BLEConfig::begin(BLEConfigItemList items)
+{
+  if (!begin())
+  {
+    return(false);
+  }
+
+  for (std::initializer_list<BLEConfigItem>::iterator item = items.begin(); item != items.end(); ++item){
+    Serial.printf("Adding characteristic for item %s\n", item->getName());
+    _service.addCharacteristic(*(item->getCharacteristic()));
+  }
+  return true;
 }
 
 void BLEConfig::advertise()
@@ -33,12 +46,4 @@ void BLEConfig::advertise()
   BLE.addService(_service);
   BLE.advertise();
   Serial.println(("Bluetooth® device active, waiting for connections..."));
-}
-
-unsigned int BLEConfig::test1()
-{
-  unsigned int v;
-  _items["dmx_address"]->getCharacteristic()->readValue(v);
-
-  return(v);
 }

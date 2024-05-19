@@ -13,19 +13,16 @@ class BLEConfig
   public:
     BLEConfig(const char* appName);
 
-    void addItem(const char* name, unsigned int defaultValue, unsigned int *variable);
+    void addItem(BLEConfigItem& item);
 
-    void begin();
+    bool begin();
+    bool begin(BLEConfigItemList items);
     void advertise();
     void end();
 
     static Preferences preferences;
 
-    unsigned int test1();
-
   private:
-    std::map<String, BLEConfigItem*> _items;
-
     BLEService _service;
     const char* _appName;
 };

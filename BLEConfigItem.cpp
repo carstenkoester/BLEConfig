@@ -6,10 +6,9 @@ unsigned int BLEConfigItem::itemNumber = 0;
 std::map<String, BLEConfigItem*> BLEConfigItem::_byName;
 std::map<BLECharacteristic, BLEConfigItem*> BLEConfigItem::_byCharacteristic;
 
-BLEConfigItem::BLEConfigItem(const char* name, void* variable, unsigned int size)
+BLEConfigItem::BLEConfigItem(const char* name, unsigned int size)
 {
   _name = name;
-  _variable = variable;
   itemNumber++;
 
   _characteristic = new BLECharacteristic("19B10001-ABCD-537E-4F6C-D104768A1214", BLERead | BLEWrite, size);
@@ -19,33 +18,33 @@ BLEConfigItem::BLEConfigItem(const char* name, void* variable, unsigned int size
   _byCharacteristic[*_characteristic] = this;
 }
 
-
 void BLEConfigItem::characteristicWritten(BLEDevice central, BLECharacteristic characteristic) {
-  // central wrote new value to characteristic, update LED
-  unsigned int v;
-  characteristic.readValue(v);
+  char* value = new char[characteristic.valueSize()];
 
-  Serial.printf("Characteristic event, written value %d\n", v);
-  Serial.printf("ch %lx\n", characteristic);
-  Serial.printf("&ch %lx\n", &characteristic);
+  characteristic.readValue(value, sizeof(value));
+  _byCharacteristic[characteristic]->writeHandler(value, sizeof(value));
 
-  void* var = _byCharacteristic[characteristic]->_variable;
-
-  Serial.printf("Going to print pointer...\n");
-  Serial.printf("Variable pointer: %llx\n", var);
-  Serial.printf("Current variable value: %d\n", *(unsigned int *)var);
-  Serial.printf("Name: %s\n", _byCharacteristic[characteristic]->_name);
-  *(unsigned int *)var = v;
-
-  char* value[characteristic.valueSize()];
-  
+  delete[] value;
 }
 
-BLEUIntConfigItem::BLEUIntConfigItem(const char* name, unsigned int* variable, unsigned int defaultValue) : BLEConfigItem(name, variable, sizeof(unsigned int))
+BLEUIntConfigItem::BLEUIntConfigItem(const char* name, unsigned int defaultValue) : BLEConfigItem(name, sizeof(unsigned int))
 {
-  *variable = BLEConfig::preferences.getUInt(name, defaultValue);
-  BLEConfig::preferences.putUInt(name, *variable);
+  _defaultValue = defaultValue;
+  _value = defaultValue;
+
+  _characteristic->writeValue(_value);
+}
+
+void BLEUIntConfigItem::writeHandler(const char* value, unsigned int size)
+{
+  _value = (unsigned int) *value;
+}
+
+void BLEUIntConfigItem::loadPreferences()
+{
+  _value = BLEConfig::preferences.getUInt(_name, _defaultValue);
+  BLEConfig::preferences.putUInt(_name, _value);
   BLEConfig::preferences.end();
 
-  _characteristic->writeValue(*variable);
+  _characteristic->writeValue(_value);
 }
