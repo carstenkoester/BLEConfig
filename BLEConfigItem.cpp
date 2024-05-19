@@ -25,6 +25,7 @@ BLEConfigItem::BLEConfigItem(const char* name, unsigned int size)
 
 void BLEConfigItem::characteristicWritten(BLEDevice central, BLECharacteristic characteristic) {
   char* value = new char[characteristic.valueSize()];
+  memset(value, 0x00, sizeof(value));
 
   characteristic.readValue(value, sizeof(value));
   _byCharacteristic[characteristic]->writeHandler(value, sizeof(value));
@@ -42,7 +43,7 @@ BLEUIntConfigItem::BLEUIntConfigItem(const char* name, unsigned int defaultValue
 
 void BLEUIntConfigItem::writeHandler(const char* value, unsigned int size)
 {
-  _value = (unsigned int) *value;
+  _value = *(unsigned int*) value;
   BLEConfig::preferences.putUInt(_name, _value);
 }
 
