@@ -3,6 +3,9 @@ Things to be done for this to be useful:
 - Implement timer to disable it after X minutes. Currently it remains configurable for the lifetime of the device. (though this CAN be worked around by calling end() from the  main app)
 - Some *very basic* input validation at least
 - Auto-generate service and descriptor UUIDs. (Not just that of the characteristic.)
+- Remove BLEConfigItemList support?
+- Rename UInt to UnsignedInt
+- Some better management around UUIDs. Maybe make another part of them configurable on a per-app basis? As a developer using this library, if I write two apps, I'd like them to be able to get unique UUIDs so that when I configure them using BLE, I can differentiate both apps using the Service ID (and not just via the device name).
 
 
 Also,
@@ -18,3 +21,10 @@ Later,
 
 - Implement other data types eg strings, bool
 - Implement input validation and figure out how to respond to invalid input
+- Add *write-only* characteristics? Useful eg. for WLAN credentials so that a WLAN passphrase can be set but can not be read by everyone
+
+Much later,
+
+- experiment with Web Bluetooth
+    - <https://www.hackster.io/gov/yet-another-blinking-led-example-cc065b?ref=user&ref_id=73379&offset=0>
+    - <https://randomnerdtutorials.com/esp32-web-bluetooth/>

@@ -38,7 +38,7 @@ BLEUIntConfigItem::BLEUIntConfigItem(const char* name, unsigned int defaultValue
   _defaultValue = defaultValue;
   _value = defaultValue;
 
-  _characteristic->writeValue(_value);
+  _characteristic->writeValue(uint32_t(_value));
 }
 
 void BLEUIntConfigItem::writeHandler(const char* value, unsigned int size)
@@ -52,5 +52,5 @@ void BLEUIntConfigItem::loadPreferences()
   _value = BLEConfig::preferences.getUInt(_name, _defaultValue);
   BLEConfig::preferences.putUInt(_name, _value);
 
-  _characteristic->writeValue(_value);
+  _characteristic->writeValue(uint32_t(_value));
 }

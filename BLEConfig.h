@@ -29,6 +29,7 @@ class BLEConfig
   private:
     BLEService _service;
     const char* _appName;
+    const char* _appNameWithMac;
     bool _active;
 };
 
