@@ -19,6 +19,8 @@ class BLEConfig
     bool begin(BLEConfigItemList items);
     void loop();
     void poll();
+    bool connected() const { return (_active && BLE.connected()); };
+    void handleConnected();
     void advertise();
     void end();
 

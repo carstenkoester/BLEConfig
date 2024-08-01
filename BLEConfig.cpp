@@ -70,6 +70,14 @@ void BLEConfig::poll()
     BLE.poll();
   }
 }
+
+void BLEConfig::handleConnected()
+{
+  while (BLE.connected()) {
+    BLE.poll(10);
+  }
+}
+
 void BLEConfig::end()
 {
   preferences.end();
