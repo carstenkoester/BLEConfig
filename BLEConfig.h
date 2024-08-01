@@ -17,6 +17,8 @@ class BLEConfig
 
     bool begin();
     bool begin(BLEConfigItemList items);
+    void loop();
+    void poll();
     void advertise();
     void end();
 

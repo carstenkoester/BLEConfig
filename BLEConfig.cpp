@@ -60,6 +60,16 @@ bool BLEConfig::begin(BLEConfigItemList items)
   return true;
 }
 
+void BLEConfig::loop() {
+  poll();
+}
+
+void BLEConfig::poll()
+{
+  if (_active) {
+    BLE.poll();
+  }
+}
 void BLEConfig::end()
 {
   preferences.end();
