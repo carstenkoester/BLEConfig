@@ -3,10 +3,11 @@
 
 Preferences BLEConfig::preferences;
 
-BLEConfig::BLEConfig(const char* appName)
-  : _service("19B10000-E8F2-537E-4F6C-D104768A1214")
+BLEConfig::BLEConfig(const char* appName, bool uniqueName)
+  : _service(SERVICE_UUID)
 {
   _appName = appName;
+  _uniqueName = uniqueName;
   _active = false;
 }
 
@@ -16,8 +17,13 @@ void BLEConfig::addItem(BLEConfigItem& item)
   _service.addCharacteristic(*item.getCharacteristic());
 }
 
-byte data[7] = { 0xff, 0xff, 0x01, 0x02, 0x03, 0x04, 0x05};
-
+void BLEConfig::pollAndHandleConnected()
+{
+  BLE.poll();
+  while (BLE.connected()) {
+    BLE.poll(10);
+  }
+}
 
 bool BLEConfig::begin()
 {
@@ -25,22 +31,22 @@ bool BLEConfig::begin()
   if (!BLE.begin()) {
     return false;
   }
-  BLE.setLocalName(_appName);
-  BLE.setDeviceName("Test Device Name");
-  BLE.setAdvertisedService(_service);
 
+  // Get our own MAC address and construct unique name
   String address = BLE.address();
-  char address2[18];
-  address.toCharArray(address2, sizeof(address2));
-  Serial.printf("Address: %x\n", address);
-  Serial.printf("Address: %s\n", address);
-  Serial.print("Local address is: ");
-  Serial.println(address);
-  Serial.printf("In char array format: %s\n", address2);
-  Serial.printf("In char array format: %c%c%c%c%c%c\n", address2[9], address2[10], address2[12], address2[13], address2[15], address2[16]);
+  char addressArray[18];
+  address.toCharArray(addressArray, sizeof(addressArray));
+  _appNameWithMac = (char*)malloc(sizeof(_appName)+9);
+  sprintf(_appNameWithMac, "%s-%c%c%c%c%c%c", _appName, addressArray[9], addressArray[10], addressArray[12], addressArray[13], addressArray[15], addressArray[16]);
 
-  BLE.setManufacturerData((unsigned char*)address2, sizeof(address2));
-  BLE.setManufacturerData(data, 7);
+  if (_uniqueName) {
+    BLE.setLocalName(_appNameWithMac);
+    BLE.setDeviceName(_appNameWithMac);
+  } else {
+    BLE.setLocalName(_appName);
+    BLE.setDeviceName(_appName);    
+  }
+  BLE.setAdvertisedService(_service);
 
   _active = true;
   return true;
@@ -54,7 +60,6 @@ bool BLEConfig::begin(BLEConfigItemList items)
   }
 
   for (std::initializer_list<BLEConfigItem>::iterator item = items.begin(); item != items.end(); ++item){
-    Serial.printf("Adding characteristic for item %s\n", item->getName());
     _service.addCharacteristic(*(item->getCharacteristic()));
   }
   return true;
@@ -89,5 +94,4 @@ void BLEConfig::advertise()
 {
   BLE.addService(_service);
   BLE.advertise();
-  Serial.println("Bluetooth® device active, waiting for connections...");
 }

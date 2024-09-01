@@ -4,7 +4,7 @@
 unsigned int BLEConfigItem::itemNumber = 0;
 
 std::map<String, BLEConfigItem*> BLEConfigItem::_byName;
-std::map<BLECharacteristic, BLEConfigItem*> BLEConfigItem::_byCharacteristic;
+std::map<String, BLEConfigItem*> BLEConfigItem::_byUUID;
 
 BLEConfigItem::BLEConfigItem(const char* name, unsigned int size)
 {
@@ -17,9 +17,10 @@ BLEConfigItem::BLEConfigItem(const char* name, unsigned int size)
   _characteristic->setEventHandler(BLEWritten, characteristicWritten);
 
   _byName[name] = this;
-  _byCharacteristic[*_characteristic] = this;
+  _byUUID[_characteristic->uuid()] = this;
 
-  BLEDescriptor desc("19B10000-E8D2-537E-4F6C-D104768A1214", name);
+  // https://infineon.github.io/bless/ble_api_reference_manual/html/group__group__ble__common__api__macros__gatt__uuid__char__desc.html#ga824b567b10a51351ca9c4cb05e9570c5
+  BLEDescriptor desc("2901", name);
   _characteristic->addDescriptor(desc);
 }
 
@@ -28,7 +29,7 @@ void BLEConfigItem::characteristicWritten(BLEDevice central, BLECharacteristic c
   memset(value, 0x00, sizeof(value));
 
   characteristic.readValue(value, sizeof(value));
-  _byCharacteristic[characteristic]->writeHandler(value, sizeof(value));
+  _byUUID[characteristic.uuid()]->writeHandler(value, sizeof(value));
 
   delete[] value;
 }
