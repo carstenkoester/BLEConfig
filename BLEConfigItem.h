@@ -20,7 +20,7 @@ class BLEConfigItem
     const char* _name;
 
     static std::map<String, BLEConfigItem*> _byName;
-    static std::map<BLECharacteristic, BLEConfigItem*> _byCharacteristic;
+    static std::map<String, BLEConfigItem*> _byUUID;
 
     virtual void writeHandler(const char* value, unsigned int size) = 0;
     virtual void loadPreferences() = 0;
