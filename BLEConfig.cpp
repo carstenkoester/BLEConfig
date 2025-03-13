@@ -44,7 +44,7 @@ bool BLEConfig::begin()
     BLE.setDeviceName(_appNameWithMac);
   } else {
     BLE.setLocalName(_appName);
-    BLE.setDeviceName(_appName);    
+    BLE.setDeviceName(_appName);
   }
   BLE.setAdvertisedService(_service);
 
