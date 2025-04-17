@@ -11,8 +11,9 @@
 class BLEConfig
 {
   public:
-    BLEConfig(const char* appName, bool uniqueName=true);
+    BLEConfig();
 
+    void setAppName(const char* appName, bool uniqueName=true);
     void addItem(BLEConfigItem& item);
 
     bool begin();

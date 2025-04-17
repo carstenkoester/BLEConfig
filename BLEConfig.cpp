@@ -3,12 +3,16 @@
 
 Preferences BLEConfig::preferences;
 
-BLEConfig::BLEConfig(const char* appName, bool uniqueName)
+BLEConfig::BLEConfig()
   : _service(SERVICE_UUID)
+{
+  _active = false;
+}
+
+void BLEConfig::setAppName(const char* appName, bool uniqueName)
 {
   _appName = appName;
   _uniqueName = uniqueName;
-  _active = false;
 }
 
 void BLEConfig::addItem(BLEConfigItem& item)
