@@ -1,32 +1,41 @@
 #ifndef BLEConfig_h
 #define BLEConfig_h
 
-#include "Arduino.h"
 #include <Preferences.h>
-#include <ArduinoBLE.h>
-#include <map>
+#include <string>
+
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
 
 #include "BLEConfigItem.h"
 
 class BLEConfig
 {
+  class ServerCallbacks : public BLEServerCallbacks {
+    public:
+      ServerCallbacks(BLEConfig *pBLEConfig);
+      void onConnect(BLEServer *pServer);
+      void onDisconnect(BLEServer *pServer);
+    protected:
+      BLEConfig* _pBLEConfig;
+  };
+
   public:
     BLEConfig();
 
-    void setAppName(const char* appName, bool uniqueName=true);
     void addItem(BLEConfigItem& item);
 
-    bool begin();
-    bool begin(BLEConfigItemList items);
+    bool begin(const char* appName, bool uniqueName=true);
+    bool begin(const char* appName, bool uniqueName, BLEConfigItemList items);
     void loop();
-    void poll();
-    bool connected() const { return (_active && BLE.connected()); };
-    void handleConnected();
-    static void pollAndHandleConnected();
     void advertise();
     void end();
 
+    inline const bool connected() const { return(_connected); };
     inline const bool active() const { return(_active); };
+    inline const unsigned long getConnectionCount() const { return(_connectionCount); };
+
 
     static Preferences preferences;
 
@@ -34,11 +43,17 @@ class BLEConfig
     static constexpr const char* UUID_TEMPLATE = "84fdef37-%04x-41e6-adbd-f87ced6f2e5b";
 
   private:
-    BLEService _service;
+    BLEServer* _pServer;
+    BLEService* _pService;
+    BLEAdvertising* _pAdvertising;
+
     const char* _appName;
     bool _uniqueName;
     char* _appNameWithMac;
-    bool _active;
+
+    bool _active = false;
+    bool _connected = false;
+    unsigned long _connectionCount = 0;
 };
 
 #endif
