@@ -48,8 +48,6 @@ class BLEConfigItem
   friend class BLEConfig;
 };
 
-using BLEConfigItemList = std::initializer_list<BLEConfigItem>;
-
 /*
  * Unsigned Integer
  */

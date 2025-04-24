@@ -27,7 +27,6 @@ class BLEConfig
     void addItem(BLEConfigItem& item);
 
     bool begin(const char* appName, bool uniqueName=true);
-    bool begin(const char* appName, bool uniqueName, BLEConfigItemList items);
     void loop();
     void advertise();
     void end();
@@ -35,7 +34,7 @@ class BLEConfig
     inline const bool connected() const { return(_connected); };
     inline const bool active() const { return(_active); };
     inline const unsigned long getConnectionCount() const { return(_connectionCount); };
-
+    inline const std::string getName() const { return(_uniqueName ? _appNameWithMac : _appName); };
 
     static Preferences preferences;
 

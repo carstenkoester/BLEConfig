@@ -31,6 +31,8 @@ void BLEConfigItem::addToService(BLEService* pService)
   _pBLE2901->setDescription(_name);
   _pCharacteristic->addDescriptor(_pBLE2901);
 
+  Serial.printf("Added BLE configuration item: UUID %s, Name %s\n", _uuid, _name);
+
   // Load from preferences and set initial value
   load();
 }
@@ -64,7 +66,6 @@ void BLEUIntConfigItem::writeHandler(String value)
 void BLEUIntConfigItem::load()
 {
   _value = BLEConfig::preferences.getUInt(_name, _defaultValue);
-  Serial.printf("Config %s val %d def %d\n", _name, _value, _defaultValue);
   BLEConfig::preferences.putUInt(_name, _value);
 
   _pBLE2904 = new BLE2904;

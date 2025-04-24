@@ -5,6 +5,8 @@
 
 Preferences BLEConfig::preferences;
 
+#define BLE_NUM_HANDLES    30  // Ref. https://github.com/espressif/arduino-esp32/issues/8060
+
 BLEConfig::BLEConfig()
 {
   _active = false;
@@ -33,23 +35,9 @@ bool BLEConfig::begin(const char* appName, bool uniqueName)
   BLEDevice::init(_uniqueName ? _appNameWithMac : _appName);
   _pServer = BLEDevice::createServer();
   _pServer->setCallbacks(new ServerCallbacks(this));
-  _pService = _pServer->createService(SERVICE_UUID);
+  _pService = _pServer->createService(BLEUUID(SERVICE_UUID), BLE_NUM_HANDLES);
 
   _active = true;
-  return true;
-}
-
-bool BLEConfig::begin(const char* appName, bool uniqueName, BLEConfigItemList items)
-{
-  if (!begin(appName, uniqueName))
-  {
-    return(false);
-  }
-
-  for (std::initializer_list<BLEConfigItem>::iterator item = items.begin(); item != items.end(); ++item){
-// FIXME
-//    item->addToService(_pService);
-  }
   return true;
 }
 
