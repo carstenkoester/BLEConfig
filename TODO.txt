@@ -4,22 +4,22 @@ Things to be done for this to be useful:
 
 - Implement timer to disable it after X minutes. Currently it remains configurable for the lifetime of the device. (though this CAN be worked around by calling end() from the  main app)
 - Some *very basic* input validation at least
-- Remove BLEConfigItemList support?
+    - Callback/validation function?
+    - Min/Max for uint?
 - Rename UInt to UnsignedInt
-- Some better management around UUIDs. Maybe make another part of them configurable on a per-app basis? As a developer using this library, if I write two apps, I'd like them to be able to get unique UUIDs so that when I configure them using BLE, I can differentiate both apps using the Service ID (and not just via the device name).
-
+- Some better management around UUIDs. Maybe make another part of them configurable on a per-app basis? As a developer using this library, if I write two apps, I'd like them to be able to get unique UUIDs so that when I configure them using BLE, I can differentiate both apps using the Service ID (and not just via the device name). Also, for Web BLE support or otherwise, characteristic UUIDs may want to be deterministic.
 
 Also,
 
-- Test with more than one config item
 - More generally, implement some Manufacturer Data.
 - Apply values right away but don't make them persistent until BLE disconnect? (This would create some safeguard against storing bad values)?
+- Some hook (argument to begin()?) to reset persisted values
 - co-exist with other BLE services. Someone may want to eg. publish battery percentage.
 
 
 Later,
 
-- Implement other data types eg strings, bool
+- Implement other data types eg bool
 - Implement input validation and figure out how to respond to invalid input
 - Add *write-only* characteristics? Useful eg. for WLAN credentials so that a WLAN passphrase can be set but can not be read by everyone
 
@@ -28,3 +28,5 @@ Much later,
 - experiment with Web Bluetooth
     - <https://www.hackster.io/gov/yet-another-blinking-led-example-cc065b?ref=user&ref_id=73379&offset=0>
     - <https://randomnerdtutorials.com/esp32-web-bluetooth/>
+
+Note.. ESP32 BLE library is huge, https://github.com/espressif/arduino-esp32/issues/1075

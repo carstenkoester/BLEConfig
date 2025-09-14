@@ -1,97 +1,84 @@
 #include <BLEConfig.h>
 #include <Arduino.h>
 
+#include "esp_mac.h"
+
 Preferences BLEConfig::preferences;
 
-BLEConfig::BLEConfig(const char* appName, bool uniqueName)
-  : _service(SERVICE_UUID)
+#define BLE_NUM_HANDLES    30  // Ref. https://github.com/espressif/arduino-esp32/issues/8060
+
+BLEConfig::BLEConfig()
 {
-  _appName = appName;
-  _uniqueName = uniqueName;
   _active = false;
 }
 
 void BLEConfig::addItem(BLEConfigItem& item)
 {
-  item.loadPreferences();
-  _service.addCharacteristic(*item.getCharacteristic());
+  item.addToService(_pService);
 }
 
-void BLEConfig::pollAndHandleConnected()
+bool BLEConfig::begin(const char* appName, bool uniqueName)
 {
-  BLE.poll();
-  while (BLE.connected()) {
-    BLE.poll(10);
-  }
-}
+  unsigned char mac[6];
 
-bool BLEConfig::begin()
-{
+  _appName = appName;
+  _uniqueName = uniqueName;
+
   preferences.begin("BLEConfig", false);
-  if (!BLE.begin()) {
-    return false;
-  }
 
   // Get our own MAC address and construct unique name
-  String address = BLE.address();
-  char addressArray[18];
-  address.toCharArray(addressArray, sizeof(addressArray));
+  esp_read_mac((uint8_t*) &mac, ESP_MAC_BT);
   _appNameWithMac = (char*)malloc(sizeof(_appName)+9);
-  sprintf(_appNameWithMac, "%s-%c%c%c%c%c%c", _appName, addressArray[9], addressArray[10], addressArray[12], addressArray[13], addressArray[15], addressArray[16]);
+  sprintf(_appNameWithMac, "%s-%02x%02x%02x", _appName, mac[3], mac[4], mac[5]);
 
-  if (_uniqueName) {
-    BLE.setLocalName(_appNameWithMac);
-    BLE.setDeviceName(_appNameWithMac);
-  } else {
-    BLE.setLocalName(_appName);
-    BLE.setDeviceName(_appName);
-  }
-  BLE.setAdvertisedService(_service);
+  // Initialize
+  BLEDevice::init(_uniqueName ? _appNameWithMac : _appName);
+  _pServer = BLEDevice::createServer();
+  _pServer->setCallbacks(new ServerCallbacks(this));
+  _pService = _pServer->createService(BLEUUID(SERVICE_UUID), BLE_NUM_HANDLES);
 
   _active = true;
   return true;
 }
 
-bool BLEConfig::begin(BLEConfigItemList items)
-{
-  if (!begin())
-  {
-    return(false);
-  }
-
-  for (std::initializer_list<BLEConfigItem>::iterator item = items.begin(); item != items.end(); ++item){
-    _service.addCharacteristic(*(item->getCharacteristic()));
-  }
-  return true;
-}
-
 void BLEConfig::loop() {
-  poll();
-}
-
-void BLEConfig::poll()
-{
-  if (_active) {
-    BLE.poll();
-  }
-}
-
-void BLEConfig::handleConnected()
-{
-  while (BLE.connected()) {
-    BLE.poll(10);
-  }
+  // Currently does... nothing.
 }
 
 void BLEConfig::end()
 {
   preferences.end();
-  BLE.end();
+  BLEDevice::deinit();
   _active = false;
 }
 
 void BLEConfig::advertise()
 {
-  BLE.addService(_service);
-  BLE.advertise();
+  _pService->start();
+
+  _pAdvertising = BLEDevice::getAdvertising();
+  _pAdvertising->addServiceUUID(SERVICE_UUID);
+  _pAdvertising->setScanResponse(true);
+  // Below is copied from https://github.com/espressif/arduino-esp32/blob/master/libraries/BLE/examples/Server/Server.ino
+  _pAdvertising->setMinPreferred(0x06);
+  _pAdvertising->setMinPreferred(0x12);
+  BLEDevice::startAdvertising();
 }
+
+
+BLEConfig::ServerCallbacks::ServerCallbacks(BLEConfig* pBLEConfig)
+{
+  _pBLEConfig = pBLEConfig;
+}
+
+void BLEConfig::ServerCallbacks::onConnect(BLEServer *pServer)
+{
+  _pBLEConfig->_connected = true;
+  _pBLEConfig->_connectionCount++;
+  BLEDevice::startAdvertising();
+};
+
+void BLEConfig::ServerCallbacks::onDisconnect(BLEServer *pServer) {
+  _pBLEConfig->_connected = false;
+  pServer->startAdvertising();  // restart advertising
+};
